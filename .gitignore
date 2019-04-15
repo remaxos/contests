@@ -1,5 +1,8 @@
-# Hardcoded binary
+# Hardcoded binary & debug
 main
+debug.txt
+debug.out
+
 
 # Prerequisites
 *.d
