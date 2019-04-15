@@ -1,217 +1,93 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
-#define MAXT 100
-#define MAXR 20
-#define MAXC 20
+#define MAXT 20
+#define MAXN 365
+#define MAXM 1000001
 
-int v[MAXR][MAXC];
+#define NHOLES 18
 
-int T, R, C;
+int T, N, M;
+int p[7] = {2, 3, 5, 7, 11, 13, 17};
+int R[MAXN][18];
+char l1[10000];
+char l2[10000];
 
-int group(int ai, int aj, int bi, int bj)
+int letters(int a)
 {
-    if (ai == -1 && aj == -1)
-	return 0;
+    int l = 0;
 
-    if (ai == bi)
-	return 1;
+    while(a) {
+	l++;
+	a = a / 10;
+    }
 
-    if (aj == bj)
-	return 1;
-
-    if ((ai - aj) == (bi - bj))
-	return 1;
-
-    if ((ai + aj) == (bi + bj))
-	return 1;
-
-    return 0;
+    return l;
 }
-
-typedef struct point {
-    int x;
-    int y;
-} point;
-
-typedef struct down {
-    int *v;
-    int ci, cj;
-    point *sol; 
-
-    int soli[MAXR * MAXC];
-    int solj[MAXR * MAXC];
-    int len;
-} down;
-
-
-typedef struct up {
-    int sol; 
-} up;
-
-
-up *rec(down *d)
-{
-    int i, j;
-    int final;
-    int found;
-    up *u;
-
-#if 0
-    for (i = 0; i < d->len; i++) {
-	printf("(%d,%d) ", d->soli[i], d->solj[i]);
-    }
-    printf("\n");
-
-    sleep(1);
-#endif
-
-    u = (up *)malloc(sizeof(up));
-    u->sol = 0;
-
-    if (d->len == R * C) {
-	printf("POSSIBLE\n");
-
-	for (i = 0; i < d->len; i++) {
-	    printf("%d %d\n", d->soli[i] + 1, d->solj[i] + 1);
-	}
-
-	u->sol = 1;
-	return u;
-    }
-
-    found = 0;
-    for (i = 0; i < R; i++) {
-	for (j = 0; j < C; j++) {
-	    if (!group(d->ci, d->cj, i, j) && !*(d->v + i * MAXR + j)) {
-		found = 1;
-
-		down *dn = (down *)malloc(sizeof(down));		
-		dn->ci = i;
-		dn->cj = j;
-		dn->v = (int *)malloc(sizeof(int) * MAXR * MAXC);
-		memcpy(dn->v, d->v, sizeof(int) * MAXR * MAXC);
-
-		memcpy(dn->soli, d->soli, sizeof(int) * MAXR * MAXC);
-		memcpy(dn->solj, d->solj, sizeof(int) * MAXR * MAXC);
-		dn->len = d->len;
-
-		dn->soli[dn->len] = i;
-		dn->solj[dn->len] = j;
-		dn->len++;
-		*(dn->v + i * MAXR + j) = 1;
-
-		up *un = rec(dn);
-		if (un->sol) {
-		    u->sol = un->sol;
-		    free(un);
-		    goto out;
-		} else {
-		    free(un);
-		}
-	    }
-	}
-    }
-
-    if (!found) {
-	u->sol = 0;	
-    }
-
-out:
-    free(d->v);
-    free(d);
-
-    return u;
-}
-
 
 int main()
 {
-    int i, j;
-    int found;
-    int valid;
-    int len;
+    FILE *f = fopen("debug.txt", "w");
+
     int t;
-    
-    int ci, cj;
+    scanf("%d %d %d", &T, &N, &M); 
+    fprintf(f, "T=%d\n", T);
+    fprintf(f, "N=%d\n", N);
+    fprintf(f, "M=%d\n", M);
+    fflush(f);
 
-    memset(v, 0, sizeof(int) * MAXR * MAXC);
+    int i, j;
+    int res;
+    int rindex;
 
-    scanf("%d", &T);
-    t = 0;
+    t = 0; 
+    while (t < T) {
+	for (i = 0; i < N; i++) {
 
-    while(t < T) {
-	scanf("%d %d\n", &R, &C);
-	
-	down *d = (down *)malloc(sizeof(down));
-	d->ci = -1;
-	d->cj = -1;
+	    memset(l1, 0, sizeof(char) * 10000);
+	    memset(l2, 0, sizeof(char) * 10000);
 
-	memset(d->soli, 0, sizeof(int) * MAXR * MAXC);
-	memset(d->solj, 0, sizeof(int) * MAXR * MAXC);
-	d->len = 0;
+	    for (j = 0; j < 18; j++) {
+		sprintf(l1, "%s %d", l1, p[i % 7]);
+	    }
+	    //sprintf(l1, "%s\n", l1);
 
-	d->v = (int *)malloc(sizeof(int) * MAXR * MAXC);
-	memset(d->v, 0, sizeof(int) * MAXR * MAXC);
+	    fprintf(f, "Q:%s\n", l1);
+	    fflush(f);
 
-	printf("Case #%d: ", t + 1);
+	    printf("%s\n", l1);
+	    fflush(stdout);
+
+	    //scanf("%s\n", l2);
+
+	    //fprintf(f, "R: %s\n", l2);
+	    //fflush(f);
+
+	    rindex = 0;
+	    fprintf(f, "R: ");
+	    for (j = 0; j < 18; j++) {
+		scanf("%d", &R[i][j]);
+		//sscanf(l2 + rindex, "%d", &R[i][j]);
+		//fprintf(f, "%s\n", l2 + rindex);
+		//rindex += letters(R[i][j]) + 1;
+		fprintf(f, "%d ", R[i][j]);
+	    }
+
+	    fprintf(f, "\n");
+	    fflush(f);
+	}
+
+	printf("100\n");
 	fflush(stdout);
-	up *u = rec(d);
-	if (u->sol == 0) {
-	    printf("IMPOSSIBLE\n");
-	}
+	scanf("%d", &res);
 
-#if 0
-	found = 1;
-	ci = cj = 0; /* start from 0 */
-	soli[0] = solj[0] = 0;
-	//v[0][0] = 1;
-	len = 1;
-	while(found) {
-	    found = 0; 
-	    for (i = 0; i < R; i++) {
-		for (j = 0; j < C; j++) {
-		    if (!group(ci, cj, i, j) && !v[i][j]) {
-			ci = i;
-			cj = j;
-
-			soli[len] = i;
-			solj[len] = j;
-			len++;
-			v[i][j] = 1;
-			found = 1;
-		    }
-		}
-	    }
-	}
-
-	valid = 1;	
-	for (i = 0; i < R; i++) {
-	    if (valid == 0)
-		break;
-
-	    for (j = 0; j < C; j++) {
-		if (!v[i][j]) {
-		    valid = 0;
-		    break;
-		}
-	    }
-	}
-	if (valid == 0)
-	    printf("invalid\n");
-	else {
-	    printf("valid\n");
-	    for (i = 0; i < R * C; i++) {
-		printf("%d %d\n", soli[i], solj[i]);
-	    }
-	}
-#endif
+	fprintf(f, "%d\n", res);
 
 	t++;
     }
 
+    fclose(f);
 
     return 0;
 }
